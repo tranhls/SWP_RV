@@ -1,0 +1,113 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    background-image: url(https://png.pngtree.com/background/20230519/original/pngtree-coffee-cup-with-a-light-behind-it-picture-image_2655228.jpg);
+    background-size: cover;
+    
+    height: auto; 
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.registration-form {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+
+.registration-form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #bd2626;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"] {
+    width: calc(100% - 20px);
+    padding: 8px 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.form-group a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.form-group a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background-color: #be3030;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+@media (max-width: 600px) {
+    .registration-form {
+        padding: 20px;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="email"] {
+        width: calc(100% - 10px);
+    }
+}
+.error-message {
+    background-color: #f8d7da; /* Màu nền */
+    border: 1px solid #f5c6cb; /* Viền */
+    color: #721c24; /* Màu chữ */
+    padding: 10px 20px; /* Khoảng cách giữa nội dung và viền */
+    border-radius: 5px; /* Bo tròn góc */
+    margin-top: 5px; /* Khoảng cách với trường nhập liệu */
+    font-size: 14px; /* Kích thước chữ */
+}
+.error {
+    color: #721c24; /* Màu chữ cho thông báo lỗi */
+    font-size: 14px; /* Kích thước chữ cho thông báo lỗi */
+    display: block; /* Hiển thị thông báo lỗi dưới dạng khối */
+    margin-top: 5px; /* Khoảng cách với trường nhập liệu */
+}
+
+#error-message {
+    background-color: #f8d7da; /* Màu nền cho thông báo lỗi */
+    border: 1px solid #f5c6cb; /* Viền cho thông báo lỗi */
+    padding: 10px 20px; /* Khoảng cách giữa nội dung và viền */
+    border-radius: 5px; /* Bo tròn góc cho thông báo lỗi */
+}
