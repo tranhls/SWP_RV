@@ -9,9 +9,11 @@ import entity.Account;
 import entity.Cart;
 import entity.Category;
 import entity.Customer;
+import entity.Feedback;
 import entity.Order;
 import entity.OrderDetails;
 import entity.Product;
+import entity.voucher;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -291,7 +293,7 @@ public class DAO {
     }
 
     public int getLastOrderId() {
-        String query = "SELECT TOP (1) [orderID] FROM [SWP391].[dbo].[order] ORDER BY orderID DESC";
+        String query = "select top 1 orderID from [order] ORDER BY orderID DESC";
         int lastOrderId = -1; // Giá trị mặc định khi không tìm thấy hoặc có lỗi
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
 
@@ -944,46 +946,199 @@ public class DAO {
             e.printStackTrace();
         }
     }
-    
+
     public boolean addCategory(String categoryName) {
-    String queryCheckExistence = "SELECT COUNT(*) FROM category WHERE category = ?";
-    String queryInsert = "INSERT INTO category (catID, category) VALUES (?, ?)";
-    
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement psCheck = conn.prepareStatement(queryCheckExistence);
-         PreparedStatement psInsert = conn.prepareStatement(queryInsert)) {
-        
-        // Kiểm tra xem category đã tồn tại chưa
-        psCheck.setString(1, categoryName);
-        ResultSet rs = psCheck.executeQuery();
-        
-        if (rs.next() && rs.getInt(1) > 0) {
-            // Category đã tồn tại, xử lý thông báo lỗi hoặc cập nhật lại thông tin (tùy theo yêu cầu)
-            System.out.println("Category '" + categoryName + "' already exists.");
-            return false;
+        String queryCheckExistence = "SELECT COUNT(*) FROM category WHERE category = ?";
+        String queryInsert = "INSERT INTO category (catID, category) VALUES (?, ?)";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement psCheck = conn.prepareStatement(queryCheckExistence); PreparedStatement psInsert = conn.prepareStatement(queryInsert)) {
+
+            // Kiểm tra xem category đã tồn tại chưa
+            psCheck.setString(1, categoryName);
+            ResultSet rs = psCheck.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Category đã tồn tại, xử lý thông báo lỗi hoặc cập nhật lại thông tin (tùy theo yêu cầu)
+                System.out.println("Category '" + categoryName + "' already exists.");
+                return false;
+            }
+
+            // Thêm category vào bảng
+            String getMaxCatIDQuery = "SELECT MAX(catID) FROM category";
+            PreparedStatement psMax = conn.prepareStatement(getMaxCatIDQuery);
+            ResultSet rsMax = psMax.executeQuery();
+
+            int nextCatID = 1; // Giá trị mặc định nếu bảng trống
+            if (rsMax.next()) {
+                nextCatID = rsMax.getInt(1) + 1;
+            }
+
+            psInsert.setInt(1, nextCatID); // Đặt giá trị cho catID
+            psInsert.setString(2, categoryName); // Đặt giá trị cho category
+
+            int rowsAffected = psInsert.executeUpdate();
+
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        // Thêm category vào bảng
-        String getMaxCatIDQuery = "SELECT MAX(catID) FROM category";
-        PreparedStatement psMax = conn.prepareStatement(getMaxCatIDQuery);
-        ResultSet rsMax = psMax.executeQuery();
-        
-        int nextCatID = 1; // Giá trị mặc định nếu bảng trống
-        if (rsMax.next()) {
-            nextCatID = rsMax.getInt(1) + 1;
-        }
-        
-        psInsert.setInt(1, nextCatID); // Đặt giá trị cho catID
-        psInsert.setString(2, categoryName); // Đặt giá trị cho category
-        
-        int rowsAffected = psInsert.executeUpdate();
-        
-        return rowsAffected > 0;
-        
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return false;
     }
-    
-    return false;
-}
+
+    public voucher getPercent(String code) {
+        String query = "select * from voucher where code = ?";;
+        try {
+            conn = new DBContext().getConnection();//mo ket noi voi sql
+            ps = conn.prepareStatement(query);
+            ps.setString(1, code);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                return new voucher(rs.getString(1),
+                        rs.getInt(2));
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    public List<voucher> getAllVoucher() {
+        List<voucher> list = new ArrayList<>();
+        String query = "select * from voucher";
+        try {
+            conn = new DBContext().getConnection();//mo ket noi voi sql
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new voucher(rs.getString(1),
+                        rs.getInt(2)));
+            }
+        } catch (Exception e) {
+        }
+        return list;
+    }
+
+    public void addNewVoucher(String code, int persent) {
+        String query = "INSERT INTO voucher(code, [percent]) VALUES (?, ?)";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setString(1, code);
+            ps.setInt(2, persent);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            // Xử lý exception, có thể log hoặc throw ra ngoài để báo lỗi
+            return;
+        }
+    }
+
+    public void deleteVoucher(String code) {
+        String query = "delete from voucher where code = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setString(1, code);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            // Xử lý exception, có thể log hoặc throw ra ngoài để báo lỗi
+            return;
+        }
+    }
+
+    public Category getCategoyByName(String name) {
+        String query = "select * from category where category = ?";
+        try {
+            conn = new DBContext().getConnection();//mo ket noi voi sql
+            ps = conn.prepareStatement(query);
+            ps.setString(1, name);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                return new Category(rs.getInt(1),
+                        rs.getString(2));
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    // get order by id
+    public List<Order> getOrderByID(int id) {
+        List<Order> list = new ArrayList<>();
+        String query = "SELECT * FROM [dbo].[order] WHERE customerID = ?";
+        try {
+            conn = new DBContext().getConnection();//mo ket noi voi sql
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new Order(rs.getInt(1),
+                        rs.getInt(2),
+                        rs.getDate(3),
+                        rs.getDouble(4),
+                        rs.getString(5)));
+            }
+        } catch (Exception e) {
+        }
+        return list;
+    }
+
+    public boolean addFeedback(Feedback feedback) throws Exception {
+        String sql = "INSERT INTO feedback (customerID, orderID, rating, comments) VALUES (?, ?, ?, ?)";
+        boolean success = false;
+
+        try (Connection conn = new DBContext().getConnection(); // Khởi tạo kết nối
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set parameters
+            if (feedback.getCustomerID() > 0) {
+                stmt.setInt(1, feedback.getCustomerID());
+            } else {
+                stmt.setNull(1, java.sql.Types.INTEGER); // Set customerID to NULL in database
+            }
+
+            if (feedback.getOrderID() > 0) {
+                stmt.setInt(2, feedback.getOrderID());
+            } else {
+                stmt.setNull(2, java.sql.Types.INTEGER); // Set orderID to NULL in database
+            }
+
+            stmt.setInt(3, feedback.getRating());
+            stmt.setString(4, feedback.getComments());
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                success = true;
+            }
+
+        } catch (SQLException e) {
+            // Xử lý và log lỗi một cách cụ thể
+            System.err.println("Error adding feedback: " + e.getMessage());
+        }
+
+        return success;
+    }
+
+    public List<Feedback> getAllFeedbacks() throws SQLException, Exception {
+        List<Feedback> feedbacks = new ArrayList<>();
+        String sql = "SELECT * FROM feedback";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int feedBackID = rs.getInt("feedBackID");
+                int customerID = rs.getInt("customerID");
+                int orderID = rs.getInt("orderID");
+                int rating = rs.getInt("rating");
+                String comments = rs.getString("comments");
+
+                Feedback feedback = new Feedback(customerID, orderID, rating, comments);
+                feedback.setFeedbackID(feedBackID);
+
+                feedbacks.add(feedback);
+            }
+        }
+
+        return feedbacks;
+    }
 }
